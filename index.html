@@ -1,63 +1,308 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-AU">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#071013">
-  <title>View 3D Design in AR</title>
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>ASUS AR Experience</title>
+
+  <script type="module"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js">
+  </script>
+
   <style>
-    :root { color-scheme: dark; font-family: Arial, Helvetica, sans-serif; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100dvh; background: #071013; color: #f4ffff; }
-    main { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
-    header { padding: 18px 20px 8px; text-align: center; }
-    h1 { margin: 0 0 6px; font-size: clamp(22px, 5vw, 34px); }
-    p { margin: 0; color: #a9c1c3; font-size: 14px; }
-    model-viewer { width: 100%; min-height: 62dvh; background: radial-gradient(circle, #173039 0%, #071013 68%); }
-    .controls { padding: 14px 18px calc(18px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    button { appearance: none; border: 1px solid #236e70; border-radius: 999px; padding: 11px 17px; background: #102326; color: #f4ffff; font-weight: 700; cursor: pointer; }
-    button.active { background: #00a9a3; border-color: #49f2e2; color: #021012; }
-    .ar-button { border: 0; border-radius: 999px; padding: 14px 22px; background: #00b8b0; color: #021012; font-weight: 800; box-shadow: 0 0 24px rgb(0 184 176 / 45%); }
-    .hint { width: 100%; text-align: center; color: #8ba4a7; font-size: 12px; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f5f7;
+      color: #111827;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 14px 18px;
+      background: #ffffff;
+      border-bottom: 1px solid #d9dde3;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    header p {
+      margin: 5px 0 0;
+      color: #5f6672;
+      font-size: 13px;
+    }
+
+    main {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      min-height: 430px;
+      background: radial-gradient(
+        circle at centre,
+        #ffffff 0%,
+        #e8ebef 100%
+      );
+      --poster-color: transparent;
+    }
+
+    .ar-button {
+      position: absolute;
+      right: 50%;
+      bottom: 18px;
+      transform: translateX(50%);
+      padding: 14px 22px;
+      border: 0;
+      border-radius: 8px;
+      background: #00539b;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    }
+
+    .ar-button:active {
+      background: #003f76;
+    }
+
+    .progress-bar {
+      display: block;
+      position: absolute;
+      left: 10%;
+      bottom: 85px;
+      width: 80%;
+      height: 6px;
+      overflow: hidden;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .progress-bar.hide {
+      visibility: hidden;
+    }
+
+    .update-bar {
+      width: 0%;
+      height: 100%;
+      background: #00539b;
+    }
+
+    footer {
+      padding: 12px;
+      background: #ffffff;
+      border-top: 1px solid #d9dde3;
+    }
+
+    .model-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .model-button {
+      min-width: 105px;
+      padding: 10px 14px;
+      border: 1px solid #00539b;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #00539b;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .model-button.active {
+      background: #00539b;
+      color: #ffffff;
+    }
+
+    #status {
+      min-height: 18px;
+      margin: 9px 0 0;
+      color: #5f6672;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 10px 12px;
+      }
+
+      header h1 {
+        font-size: 18px;
+      }
+
+      model-viewer {
+        min-height: 380px;
+      }
+
+      .model-button {
+        flex: 1;
+        min-width: 90px;
+        padding: 10px 8px;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
-<body>
-  <main>
-    <header>
-      <h1>View the design in 3D</h1>
-      <p>Drag to rotate, pinch to zoom, or place it in your space.</p>
-    </header>
 
-    <model-viewer id="viewer"
-      src="models/asset-2.gltf"
-      alt="Interactive 3D design"
+<body>
+  <header>
+    <h1>ASUS AR Experience</h1>
+    <p>Select a model, then tap “View in your space”.</p>
+  </header>
+
+  <main>
+    <model-viewer
+      id="arViewer"
+      src="asset-2.glb"
+      alt="Interactive ASUS 3D model"
       ar
-      ar-modes="webxr scene-viewer quick-look"
-      ar-scale="auto"
+      ar-modes="scene-viewer webxr quick-look"
+      ar-placement="floor"
       camera-controls
+      touch-action="pan-y"
       auto-rotate
       shadow-intensity="1"
+      shadow-softness="0.8"
       exposure="1"
-      touch-action="pan-y">
-      <button class="ar-button" slot="ar-button">View in your space</button>
-    </model-viewer>
+      environment-image="neutral"
+      interaction-prompt="auto">
 
-    <section class="controls" aria-label="Choose model">
-      <button type="button" data-src="models/asset-1.gltf">Asset 1</button>
-      <button type="button" class="active" data-src="models/asset-2.gltf">Asset 2</button>
-      <div class="hint">The AR button appears on compatible iPhone and Android devices.</div>
-    </section>
+      <button
+        class="ar-button"
+        slot="ar-button"
+        type="button">
+        View in your space
+      </button>
+
+      <div
+        class="progress-bar"
+        slot="progress-bar">
+        <div class="update-bar"></div>
+      </div>
+    </model-viewer>
   </main>
 
+  <footer>
+    <div class="model-buttons">
+      <button
+        type="button"
+        class="model-button"
+        data-src="asset-1.glb"
+        data-name="Asset 1">
+        Asset 1
+      </button>
+
+      <button
+        type="button"
+        class="model-button active"
+        data-src="asset-2.glb"
+        data-name="Asset 2">
+        Asset 2
+      </button>
+
+      <button
+        type="button"
+        class="model-button"
+        data-src="expertbook-b5-flip.gltf"
+        data-name="ExpertBook B5 Flip">
+        ExpertBook B5 Flip
+      </button>
+    </div>
+
+    <p id="status">Asset 2 loaded. Move and rotate the model to preview it.</p>
+  </footer>
+
   <script>
-    const viewer = document.querySelector('#viewer');
-    document.querySelectorAll('[data-src]').forEach((button) => {
-      button.addEventListener('click', () => {
-        viewer.src = button.dataset.src;
-        document.querySelectorAll('[data-src]').forEach((item) => item.classList.remove('active'));
-        button.classList.add('active');
+    const viewer = document.getElementById("arViewer");
+    const status = document.getElementById("status");
+    const buttons = document.querySelectorAll(".model-button");
+    const progressBar = document.querySelector(".progress-bar");
+    const updateBar = document.querySelector(".update-bar");
+
+    let selectedName = "Asset 2";
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const newSource = button.dataset.src;
+        selectedName = button.dataset.name;
+
+        buttons.forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        status.textContent = "Loading " + selectedName + "…";
+        progressBar.classList.remove("hide");
+        updateBar.style.width = "0%";
+
+        viewer.src = newSource;
+        viewer.alt = selectedName + " interactive 3D model";
       });
+    });
+
+    viewer.addEventListener("progress", (event) => {
+      const percentage = Math.round(event.detail.totalProgress * 100);
+      updateBar.style.width = percentage + "%";
+
+      if (percentage >= 100) {
+        progressBar.classList.add("hide");
+      }
+    });
+
+    viewer.addEventListener("load", () => {
+      status.textContent =
+        selectedName + " loaded. Tap “View in your space” to launch AR.";
+    });
+
+    viewer.addEventListener("error", () => {
+      progressBar.classList.add("hide");
+      status.textContent =
+        "The model could not be loaded. Check that the filename matches exactly.";
+    });
+
+    viewer.addEventListener("ar-status", (event) => {
+      if (event.detail.status === "session-started") {
+        status.textContent =
+          "AR opened. Slowly move your phone to detect a surface.";
+      }
+
+      if (event.detail.status === "failed") {
+        status.textContent =
+          "AR could not start. Check that Google Play Services for AR is installed and updated.";
+      }
+
+      if (event.detail.status === "not-presenting") {
+        status.textContent =
+          selectedName + " loaded. Tap “View in your space” to launch AR.";
+      }
     });
   </script>
 </body>
